@@ -6,7 +6,8 @@ out before running in a live environment. Any constructive comments are always
 welcome.
 
 # Folder structure
-admintools                - system admin tools
-  disk                    - disk system admin tools
-    hashdir               - hashes directory structures
-    syncandhash           - uses rsync and hashdir to sync and hash directories
+
+- admintools              - system admin tools
+  - disk                  - disk system admin tools
+    - hashdir             - hashes directory structures
+    - syncandhash         - uses rsync and hashdir to sync and hash directories
