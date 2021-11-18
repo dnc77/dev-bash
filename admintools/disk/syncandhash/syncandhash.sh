@@ -41,12 +41,14 @@ Comments: Is this hashing really necessary? rsync typically does a great
 Version Control
 Date        Description                                        Author
 ages back   Initial developmet                                 Duncan
-13 Nov 2021 Revised layout for ease of use                     Duncan   
+13 Nov 2021 Some date output fixes                             Duncan
+17 Nov 2021 Stat log revised                                   Duncan
+17 Nov 2021 Remove old log files                               Duncan
 */
 '
 # Dependencies deserving mention
 # hashdir.sh v2.03.0003, nice, rsync, date
-VERSION='v1.01.0000'
+VERSION='v1.01.0003'
 
 #
 # User variables
@@ -83,7 +85,7 @@ HASH=
 # Tool configuration
 RSYNCOPT="-rv --del --progress --size-only --inplace"    # -rvn simulate
 RSYNCMODE="starting"  #"simulation"  # n option
-DATEOPT='+%a %d %b %Y %H:%M:%S.%N'
+DATEOPT="+%a %d %b %Y %H:%M:%S.%N"
 
 # Tools
 NICE=nice
@@ -97,12 +99,20 @@ DATE=date
 # Locations.
 CURPATH=`pwd`
 
+# Remove any old log files.
+rm -f "$LOGFILE"
+rm -f "$SRCHASHLOGFILE"*
+rm -f "$DESTHASHLOGFILE"*
+
 # Keep track of time!
-statStart=`$DATE "$DATEOPT"`
+curdate=`$DATE "$DATEOPT"`
+statLog="syncandhash statistics"
+statLog="$statLog\n-----------------------\n\n"
+statLog=s"$statLog\nstarted: $curdate"
 
 # Prepare last sync information.
-echo "Sync $RSYNCMODE at:  `$DATE $DATEOPT`" > $LOGFILE
-ls -lha $LOGFILE
+echo "Sync $RSYNCMODE at:  `$DATE "$DATEOPT"`" > $LOGFILE
+# ls -lha $LOGFILE
 
 # Fetch...
 cd "$SRCDIR"
@@ -127,7 +137,8 @@ for x in $HASHDIRS; do
    echo "sync complete - generate hashsums" 2>&1 >> "$LOGFILE"
 
    # Keep track of time
-   statRsyncEnd=``$DATE "$DATEOPT"
+   curdate=`$DATE "$DATEOPT"`
+   statLog="$statLog sync ($x) completed: $curdate"
 
    # Generate source hashsums...
    OUTOPTS="-V$SRCHASHLOGFILE-$x.log -T$SRCTSFILE-$x.syn"
@@ -136,7 +147,8 @@ for x in $HASHDIRS; do
    echo "source hashsum: $SOURCEHASH" 2>&1 >> "$LOGFILE"
 
    # Keep track of time
-   statSrcEnd=`$DATE "$DATEOPT"`
+   curdate=`$DATE "$DATEOPT"`
+   statLog=$statLog"source hashsum ($x) generated: $curdate"
 
    # Generate destination hashsums...
    OUTOPTS="-V$DESTHASHLOGFILE-$x.log -T$DSTTSFILE-$x.syn"
@@ -145,7 +157,8 @@ for x in $HASHDIRS; do
    echo "destination hashsum: $DESTHASH" 2>&1 >> "$LOGFILE"
 
    # Keep track of time
-   statDstEnd=`$DATE "$DATEOPT"`
+   curdate=`$DATE "$DATEOPT"`
+   statLog=$statLog"dest hashsum ($x) generated: $curdate"
 
    # Report hashsum status...
    if [ $SOURCEHASH == $DESTHASH ]; then
@@ -157,19 +170,8 @@ for x in $HASHDIRS; do
    fi
 done
 
-echo "Sync finished at:  $DATE $DATEOPT"
-echo "Sync finished at:  $DATE $DATEOPT" >> $LOGFILE
-
-echo "Stats:"
-echo "started: $statStart"
-echo "rsync completed: $statRsyncEnd"
-echo "hash src completed: $statSrcEnd"
-echo "hash dst completed: $statDstEnd"
-echo "Stats:" >> $LOGFILE
-echo "started: $statStart" >> $LOGFILE
-echo "rsync completed: $statRsyncEnd" >> $LOGFILE
-echo "hash src completed: $statSrcEnd" >> $LOGFILE
-echo "hash dst completed: $statDstEnd" >> $LOGFILE
-
-cd $CURPATH
-
+# Output stats.
+curdate=`$DATE "$DATEOPT"`
+statLog=$statLog"completed: `$DATE "$DATEOPT"`"
+echo -e "$statLog"
+echo -e "$statLog" >> $LOGFILE
