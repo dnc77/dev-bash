@@ -11,3 +11,5 @@ welcome.
   - disk                  - disk system admin tools
     - hashdir             - hashes directory structures
     - syncandhash         - uses rsync and hashdir to sync and hash directories
+  - terminal              - some random terminal tools and helpers
+    - shellcmdcounter     - line counter during terminal editing
